@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import com.ipsmeet.torchapp.ui.layout.MainScreen
 import com.ipsmeet.torchapp.ui.theme.TorchAppTheme
 
@@ -16,7 +17,8 @@ class MainActivity : ComponentActivity() {
     private var cameraID = "0"
 
     private lateinit var sosHandler: Handler
-    private var sosIsOn = false
+
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     isSosOn = { isSosOn ->
-                        sosIsOn = isSosOn
+                        mainViewModel.sosOn.value = isSosOn
                         if (isSosOn) {
                             toggleSos()
                         } else {
@@ -58,13 +60,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun toggleSos() {
-        cameraManager.setTorchMode(cameraID, sosIsOn)
-        sosIsOn = !sosIsOn
+        cameraManager.setTorchMode(cameraID, mainViewModel.sosOn.value)
+        mainViewModel.updateSosState()
         sosHandler.postDelayed({ toggleSos() }, 500)
     }
 
     private fun turnOffSos() {
-        sosIsOn = false
+        mainViewModel.sosOn.value = false
+        mainViewModel.updateTorchImg()
         sosHandler.removeCallbacksAndMessages(null)
         cameraManager.setTorchMode(cameraID, false)
     }

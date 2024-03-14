@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,13 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ipsmeet.torchapp.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ipsmeet.torchapp.MainViewModel
 import com.ipsmeet.torchapp.ui.theme.TorchAppTheme
 
 @Composable
-fun MainScreen(isLightOn: (Boolean) -> Unit, isSosOn: (Boolean) -> Unit) {
-    var isTorchOn by rememberSaveable { mutableStateOf(false) }
-    var torchImg by rememberSaveable { mutableIntStateOf(R.drawable.torch_off) }
+fun MainScreen(
+    isLightOn: (Boolean) -> Unit,
+    isSosOn: (Boolean) -> Unit,
+    mainViewModel: MainViewModel = viewModel()
+) {
     var sosOn by rememberSaveable { mutableStateOf(false) }
 
     Box {
@@ -47,7 +49,7 @@ fun MainScreen(isLightOn: (Boolean) -> Unit, isSosOn: (Boolean) -> Unit) {
         ) {
             Spacer(modifier = Modifier.height(100.dp))
             Image(
-                painter = painterResource(id = torchImg),
+                painter = painterResource(id = mainViewModel.torchImg.intValue),
                 contentDescription = "",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -56,9 +58,9 @@ fun MainScreen(isLightOn: (Boolean) -> Unit, isSosOn: (Boolean) -> Unit) {
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) {
-                        isTorchOn = !isTorchOn
-                        torchImg = if (isTorchOn) R.drawable.torch_on else R.drawable.torch_off
-                        isLightOn(isTorchOn)
+                        mainViewModel.updateTorchState()
+                        mainViewModel.updateTorchImg()
+                        isLightOn(mainViewModel.isTorchOn.value)
                     }
             )
         }   // Column
